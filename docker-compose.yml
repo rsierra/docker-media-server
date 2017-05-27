@@ -57,3 +57,17 @@ services:
       - ${PLEXPY_CONFIG_PATH}:/config
       - ${PLEX_LOGS_PATH}:/logs:ro
     restart: always
+
+  ombi:
+    container_name: ombi
+    image: linuxserver/ombi
+    ports:
+      - "3579:3579"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      -v ${OMBI_CONFIG_PATH}:/config
+    restart: always
