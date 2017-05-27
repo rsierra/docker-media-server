@@ -37,6 +37,7 @@ services:
       PGID: ${PGID}
       VERSION: latest
       TZ: ${TIMEZONE}
+    network_mode: host
     volumes:
       - ${PLEX_CONFIG_PATH}:/config
       - ${MEDIA_PATH}:/data/media
