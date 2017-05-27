@@ -35,7 +35,7 @@ services:
     environment:
       PUID: ${PUID}
       PGID: ${PGID}
-      VERSION=latest
+      VERSION: latest
       TZ: ${TIMEZONE}
     volumes:
       - ${PLEX_CONFIG_PATH}:/config
@@ -50,7 +50,6 @@ services:
     environment:
       PUID: ${PUID}
       PGID: ${PGID}
-      VERSION=latest
       TZ: ${TIMEZONE}
     volumes:
       - ${PLEXPY_CONFIG_PATH}:/config
