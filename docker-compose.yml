@@ -94,5 +94,5 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
-      -v ${OMBI_CONFIG_PATH}:/config
+      - ${OMBI_CONFIG_PATH}:/config
     restart: always
