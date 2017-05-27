@@ -62,6 +62,7 @@ services:
     volumes:
       - ${PLEX_CONFIG_PATH}:/config
       - ${MEDIA_PATH}:/data/media
+      - ${REMOTE_MEDIA_PATH}:/data/remote
     restart: always
 
   plexpy:
