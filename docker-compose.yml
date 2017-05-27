@@ -16,6 +16,7 @@ services:
     restart: always
 
   radarr:
+    container_name: radarr
     image: linuxserver/radarr
     ports:
       - "7878:7878"
