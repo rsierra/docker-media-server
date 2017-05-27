@@ -4,7 +4,7 @@ services:
     container_name: sonarr
     image: linuxserver/sonarr
     ports:
-      - "8989"
+      - "8989:8989"
     environment:
       PUID: ${PUID}
       PGID: ${PGID}
@@ -18,7 +18,7 @@ services:
   radarr:
     image: linuxserver/radarr
     ports:
-      - "7878"
+      - "7878:7878"
     environment:
       PUID: ${PUID}
       PGID: ${PGID}
@@ -47,7 +47,7 @@ services:
     container_name: plexpy
     image: linuxserver/plexpy
     ports:
-      - "8181"
+      - "8181:8181"
     environment:
       PUID: ${PUID}
       PGID: ${PGID}
