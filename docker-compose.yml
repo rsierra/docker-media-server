@@ -1,0 +1,55 @@
+version: '2'
+services:
+  sonarr:
+    image: linuxserver/sonarr
+    ports:
+      - "8989"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${SONARR_CONFIG_PATH}:/config
+      - ${SHOWS_PATH}:/tv
+      - ${DOWNLOADS_PATH}:/downloads
+    restart: always
+
+  radarr:
+    image: linuxserver/radarr
+    ports:
+      - "7878"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${RADARR_CONFIG_PATH}:/config
+      - ${MOVIES_PATH}:/tv
+      - ${DOWNLOADS_PATH}:/downloads
+    restart: always
+
+  plex:
+    image: linuxserver/plex
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      VERSION=latest
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${PLEX_CONFIG_PATH}:/config
+      - ${MEDIA_PATH}:/data/media
+    restart: always
+
+  plexpy:
+    image: linuxserver/plexpy
+    ports:
+      - "8181"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      VERSION=latest
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${PLEXPY_CONFIG_PATH}:/config
+      - ${PLEX_LOGS_PATH}:/logs:ro
+    restart: always
