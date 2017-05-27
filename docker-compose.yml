@@ -81,6 +81,10 @@ services:
   ombi:
     container_name: ombi
     image: linuxserver/ombi
+    links:
+      - sonarr
+      - radarr
+      - plex
     ports:
       - "3579:3579"
     environment:
