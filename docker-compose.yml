@@ -1,6 +1,7 @@
 version: '2'
 services:
   sonarr:
+    container_name: sonarr
     image: linuxserver/sonarr
     ports:
       - "8989"
@@ -29,6 +30,7 @@ services:
     restart: always
 
   plex:
+    container_name: plex
     image: linuxserver/plex
     environment:
       PUID: ${PUID}
@@ -41,6 +43,7 @@ services:
     restart: always
 
   plexpy:
+    container_name: plexpy
     image: linuxserver/plexpy
     ports:
       - "8181"
