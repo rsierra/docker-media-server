@@ -4,8 +4,8 @@ services:
     container_name: transmission
     image: linuxserver/transmission
     ports:
-      - "8989:8989"
       - "9091:9091"
+      - "51413:51413"
       - "51413:51413/udp"
     environment:
       PUID: ${PUID}
