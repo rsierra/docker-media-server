@@ -12,8 +12,8 @@ services:
       PGID: ${PGID}
       TZ: ${TIMEZONE}
     volumes:
-      -v ${TRANSMISSION_CONFIG_PATH}:/config
-      -v ${DOWNLOADS_PATH}:/downloads
+      - ${TRANSMISSION_CONFIG_PATH}:/config
+      - ${DOWNLOADS_PATH}:/downloads
     restart: always
 
   sonarr:
