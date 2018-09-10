@@ -66,9 +66,9 @@ services:
       - ${REMOTE_MEDIA_PATH}:/data/remote
     restart: unless-stopped
 
-  plexpy:
-    container_name: plexpy
-    image: linuxserver/plexpy
+  tautulli:
+    container_name: tautulli
+    image: linuxserver/tautulli
     ports:
       - "8181:8181"
     environment:
