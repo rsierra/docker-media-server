@@ -14,7 +14,7 @@ services:
     volumes:
       - ${TRANSMISSION_CONFIG_PATH}:/config
       - ${DOWNLOADS_PATH}:/downloads
-    restart: always
+    restart: unless-stopped
 
   sonarr:
     container_name: sonarr
@@ -31,7 +31,7 @@ services:
       - ${SONARR_CONFIG_PATH}:/config
       - ${SHOWS_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
-    restart: always
+    restart: unless-stopped
 
   radarr:
     container_name: radarr
@@ -48,7 +48,7 @@ services:
       - ${RADARR_CONFIG_PATH}:/config
       - ${MOVIES_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
-    restart: always
+    restart: unless-stopped
 
   plex:
     container_name: plex
@@ -63,7 +63,7 @@ services:
       - ${PLEX_CONFIG_PATH}:/config
       - ${MEDIA_PATH}:/data/media
       - ${REMOTE_MEDIA_PATH}:/data/remote
-    restart: always
+    restart: unless-stopped
 
   plexpy:
     container_name: plexpy
@@ -77,7 +77,7 @@ services:
     volumes:
       - ${PLEXPY_CONFIG_PATH}:/config
       - ${PLEX_LOGS_PATH}:/logs:ro
-    restart: always
+    restart: unless-stopped
 
   ombi:
     container_name: ombi
@@ -95,4 +95,5 @@ services:
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
       - ${OMBI_CONFIG_PATH}:/config
+    restart: unless-stopped
     restart: always
