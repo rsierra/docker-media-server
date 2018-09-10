@@ -52,15 +52,16 @@ services:
 
   plex:
     container_name: plex
-    image: linuxserver/plex
+    image: plexinc/pms-docker:${PLEX_VERSION}
     environment:
       PUID: ${PUID}
       PGID: ${PGID}
-      VERSION: latest
       TZ: ${TIMEZONE}
+      PLEX_CLAIM: ${PLEX_CLAIM}
     network_mode: host
     volumes:
       - ${PLEX_CONFIG_PATH}:/config
+      - ${TRANSCODING_PATH}:/transcode
       - ${MEDIA_PATH}:/data/media
       - ${REMOTE_MEDIA_PATH}:/data/remote
     restart: unless-stopped
