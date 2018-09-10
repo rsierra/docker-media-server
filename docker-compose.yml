@@ -33,6 +33,24 @@ services:
       - ${DOWNLOADS_PATH}:/downloads
     restart: unless-stopped
 
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett
+    links:
+      - transmission
+      - sonarr
+      - radarr
+    ports:
+      - "9117:9117"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${JACKETT_CONFIG_PATH}:/config
+      - ${DOWNLOADS_PATH}:/downloads
+    restart: unless-stopped
+
   radarr:
     container_name: radarr
     image: linuxserver/radarr
