@@ -54,10 +54,6 @@ services:
     container_name: jackett
     image: linuxserver/jackett
     restart: unless-stopped
-    links:
-      - transmission
-      - sonarr
-      - radarr
     ports:
       - "9117:9117"
     environment:
