@@ -22,6 +22,7 @@ services:
     restart: unless-stopped
     links:
       - transmission
+      - jackett
     ports:
       - "8989:8989"
     environment:
@@ -39,6 +40,7 @@ services:
     restart: unless-stopped
     links:
       - transmission
+      - jackett
     ports:
       - "7878:7878"
     environment:
