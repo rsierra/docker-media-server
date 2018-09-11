@@ -93,7 +93,7 @@ services:
       PGID: ${PGID}
       TZ: ${TIMEZONE}
     volumes:
-      - ${PLEXPY_CONFIG_PATH}:/config
+      - ${TAUTULLI_CONFIG_PATH}:/config
 
   ombi:
     container_name: ombi
