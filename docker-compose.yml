@@ -1,5 +1,21 @@
 version: '2'
 services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer
+    restart: unless-stopped
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - "9000:9000"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PORTAINER_DATA_PATH}:/data
+      - ${PORTAINER_SHARED_PATH}:/shared
+
   transmission:
     container_name: transmission
     image: linuxserver/transmission
