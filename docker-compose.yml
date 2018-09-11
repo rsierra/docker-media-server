@@ -33,6 +33,23 @@ services:
       - ${SHOWS_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
 
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr
+    restart: unless-stopped
+    links:
+      - transmission
+    ports:
+      - "7878:7878"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${RADARR_CONFIG_PATH}:/config
+      - ${MOVIES_PATH}:/tv
+      - ${DOWNLOADS_PATH}:/downloads
+
   jackett:
     container_name: jackett
     image: linuxserver/jackett
@@ -49,23 +66,6 @@ services:
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
       - ${JACKETT_CONFIG_PATH}:/config
-      - ${DOWNLOADS_PATH}:/downloads
-
-  radarr:
-    container_name: radarr
-    image: linuxserver/radarr
-    restart: unless-stopped
-    links:
-      - transmission
-    ports:
-      - "7878:7878"
-    environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-    volumes:
-      - ${LOCALTIME_PATH}:/etc/localtime:ro
-      - ${RADARR_CONFIG_PATH}:/config
-      - ${MOVIES_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
 
   plex:
