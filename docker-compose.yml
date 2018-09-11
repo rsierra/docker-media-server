@@ -3,6 +3,7 @@ services:
   transmission:
     container_name: transmission
     image: linuxserver/transmission
+    restart: unless-stopped
     ports:
       - "9091:9091"
       - "51413:51413"
@@ -14,11 +15,11 @@ services:
     volumes:
       - ${TRANSMISSION_CONFIG_PATH}:/config
       - ${DOWNLOADS_PATH}:/downloads
-    restart: unless-stopped
 
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr
+    restart: unless-stopped
     links:
       - transmission
     ports:
@@ -31,11 +32,11 @@ services:
       - ${SONARR_CONFIG_PATH}:/config
       - ${SHOWS_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
-    restart: unless-stopped
 
   jackett:
     container_name: jackett
     image: linuxserver/jackett
+    restart: unless-stopped
     links:
       - transmission
       - sonarr
@@ -49,11 +50,11 @@ services:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
       - ${JACKETT_CONFIG_PATH}:/config
       - ${DOWNLOADS_PATH}:/downloads
-    restart: unless-stopped
 
   radarr:
     container_name: radarr
     image: linuxserver/radarr
+    restart: unless-stopped
     links:
       - transmission
     ports:
@@ -66,11 +67,11 @@ services:
       - ${RADARR_CONFIG_PATH}:/config
       - ${MOVIES_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
-    restart: unless-stopped
 
   plex:
     container_name: plex
     image: plexinc/pms-docker:${PLEX_VERSION}
+    restart: unless-stopped
     environment:
       PUID: ${PUID}
       PGID: ${PGID}
@@ -82,11 +83,11 @@ services:
       - ${TRANSCODING_PATH}:/transcode
       - ${MEDIA_PATH}:/data/media
       - ${REMOTE_MEDIA_PATH}:/data/remote
-    restart: unless-stopped
 
   tautulli:
     container_name: tautulli
     image: linuxserver/tautulli
+    restart: unless-stopped
     ports:
       - "8181:8181"
     environment:
@@ -95,11 +96,11 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - ${PLEXPY_CONFIG_PATH}:/config
-    restart: unless-stopped
 
   ombi:
     container_name: ombi
     image: linuxserver/ombi
+    restart: unless-stopped
     links:
       - sonarr
       - radarr
