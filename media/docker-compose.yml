@@ -1,0 +1,49 @@
+version: '3.5'
+
+services:
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker:${PLEX_VERSION}
+    restart: unless-stopped
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+      PLEX_CLAIM: ${PLEX_CLAIM}
+    volumes:
+      - ${PLEX_CONFIG_PATH}:/config
+      - ${PLEX_TRANSCODING_PATH}:/transcode
+      - ${MEDIA_PATH}:/data/media
+    networks:
+      - media-server
+
+  tautulli:
+    container_name: tautulli
+    image: linuxserver/tautulli
+    restart: unless-stopped
+    ports:
+      - "8181:8181"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${TAUTULLI_CONFIG_PATH}:/config
+    networks:
+      - media-server
+
+  ombi:
+    container_name: ombi
+    image: linuxserver/ombi
+    restart: unless-stopped
+    ports:
+      - "3579:3579"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${OMBI_CONFIG_PATH}:/config
+    networks:
+      - media-server

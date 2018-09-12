@@ -1,0 +1,33 @@
+version: '3.5'
+
+services:
+  watchtower:
+    container_name: watchtower
+    image: v2tec/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer
+    restart: unless-stopped
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - "9000:9000"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PORTAINER_DATA_PATH}:/data
+      - ${PORTAINER_SHARED_PATH}:/shared
+    networks:
+        - media-server
+
+networks:
+  media-server:
+    name: media-server
+    driver: bridge

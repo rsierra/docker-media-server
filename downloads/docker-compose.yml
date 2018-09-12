@@ -1,0 +1,76 @@
+version: '3.5'
+
+services:
+  transmission:
+    container_name: transmission
+    image: linuxserver/transmission
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+      - "51413:51413"
+      - "51413:51413/udp"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${TRANSMISSION_CONFIG_PATH}:/config
+      - ${DOWNLOADS_PATH}:/downloads
+    networks:
+      - media-server
+
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr
+    restart: unless-stopped
+    depends_on:
+      - transmission
+      - jackett
+    ports:
+      - "8989:8989"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${SONARR_CONFIG_PATH}:/config
+      - ${MEDIA_PATH}:/tv
+      - ${DOWNLOADS_PATH}:/downloads
+    networks:
+      - media-server
+
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr
+    restart: unless-stopped
+    depends_on:
+      - transmission
+      - jackett
+    ports:
+      - "7878:7878"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${RADARR_CONFIG_PATH}:/config
+      - ${MEDIA_PATH}:/tv
+      - ${DOWNLOADS_PATH}:/downloads
+    networks:
+      - media-server
+
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett
+    restart: unless-stopped
+    ports:
+      - "9117:9117"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${JACKETT_CONFIG_PATH}:/config
+      - ${DOWNLOADS_PATH}:/downloads
+    networks:
+      - media-server
