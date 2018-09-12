@@ -47,3 +47,7 @@ services:
       - ${OMBI_CONFIG_PATH}:/config
     networks:
       - media-server
+
+networks:
+  media-server:
+    external: true

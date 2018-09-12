@@ -74,3 +74,7 @@ services:
       - ${DOWNLOADS_PATH}:/downloads
     networks:
       - media-server
+
+networks:
+  media-server:
+    external: true
