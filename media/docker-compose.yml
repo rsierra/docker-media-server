@@ -14,8 +14,7 @@ services:
       - ${PLEX_CONFIG_PATH}:/config
       - ${PLEX_TRANSCODING_PATH}:/transcode
       - ${MEDIA_PATH}:/data/media
-    networks:
-      - media-server
+    network_mode: host
 
   tautulli:
     container_name: tautulli
