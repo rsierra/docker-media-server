@@ -1,6 +1,17 @@
 version: '3.5'
 
 services:
+  ddclient:
+    container_name: ddclient
+    image: linuxserver/ddclient
+    restart: unless-stopped
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${DDCLIENT_CONFIG_PATH}:/config
+
   watchtower:
     container_name: watchtower
     image: v2tec/watchtower
