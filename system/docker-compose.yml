@@ -34,7 +34,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${PORTAINER_DATA_PATH}:/data
-      - ${PORTAINER_SHARED_PATH}:/shared
     networks:
         - media-server
 
