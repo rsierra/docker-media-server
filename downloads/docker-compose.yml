@@ -15,6 +15,7 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - ${TRANSMISSION_CONFIG_PATH}:/config
+      - ${TRANSMISSION_WATCH_PATH}:/watch
       - ${DOWNLOADS_PATH}:/downloads
     networks:
       - media-server
@@ -54,7 +55,7 @@ services:
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
       - ${RADARR_CONFIG_PATH}:/config
-      - ${MEDIA_PATH}:/tv
+      - ${MEDIA_PATH}:/movies
       - ${DOWNLOADS_PATH}:/downloads
     networks:
       - media-server

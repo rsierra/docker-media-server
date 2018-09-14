@@ -28,6 +28,7 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - ${TAUTULLI_CONFIG_PATH}:/config
+      - ${TAUTULLI_LOGS_PATH}:/logs
     networks:
       - media-server
 
