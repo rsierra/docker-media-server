@@ -67,7 +67,6 @@ services:
     image: traefik
     restart: unless-stopped
     domainname: ${SERVER_DOMAIN}
-
     ports:
       - "80:80"
       - "443:443"
