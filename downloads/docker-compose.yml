@@ -35,8 +35,8 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - ${CONFIG_PATH}/transmission:/config
-      - ${DOWNLOADS_PATH}/watch:/watch
-      - ${DOWNLOADS_PATH}:/downloads
+      - ${DOWNLOADS_PATH}/transmission/watch:/watch
+      - ${DOWNLOADS_PATH}/transmission:/downloads
     networks:
       - traefik
     labels:
