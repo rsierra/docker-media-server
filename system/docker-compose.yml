@@ -10,7 +10,7 @@ services:
       PGID: ${PGID}
       TZ: ${TIMEZONE}
     volumes:
-      - ${DDCLIENT_CONFIG_PATH}:/config
+      - ${CONFIG_PATH}/ddclient:/config
 
   watchtower:
     container_name: watchtower
@@ -33,7 +33,7 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${PORTAINER_DATA_PATH}:/data
+      - ${CONFIGS_PATH}/portainer:/data
     networks:
         - media-server
 
