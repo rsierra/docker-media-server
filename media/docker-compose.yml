@@ -26,7 +26,7 @@ services:
       - ${PLEX_TRANSCODING_PATH}:/transcode
       - ${MEDIA_PATH}:/data
     networks:
-      - media-server
+      - traefik
 
   tautulli:
     container_name: tautulli
@@ -42,7 +42,7 @@ services:
       - ${CONFIGS_PATH}/tautulli:/config
       - ${LOGS_PATH}/tautulli:/logs
     networks:
-      - media-server
+      - traefik
 
   ombi:
     container_name: ombi
@@ -58,8 +58,8 @@ services:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
       - ${CONFIGS_PATH}/ombi:/config
     networks:
-      - media-server
+      - traefik
 
 networks:
-  media-server:
+  traefik:
     external: true

@@ -35,7 +35,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${CONFIGS_PATH}/portainer:/data
     networks:
-        - media-server
+        - traefik
 
   traefik:
     container_name: traefik
@@ -44,7 +44,7 @@ services:
     domainname: ${DOMAIN_NAME}
     networks:
       - default
-      - media-server
+      - traefik
     ports:
       - "80:80"
       - "443:443"
@@ -57,6 +57,8 @@ services:
       - ${CONFIGS_PATH}/traefik:/etc/traefik
 
 networks:
-  media-server:
-    name: media-server
+  traefik:
+    name: traefik
+    driver: bridge
+  default:
     driver: bridge

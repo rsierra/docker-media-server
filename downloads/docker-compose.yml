@@ -18,7 +18,7 @@ services:
       - ${DOWNLOADS_PATH}/watch:/watch
       - ${DOWNLOADS_PATH}:/downloads
     networks:
-      - media-server
+      - traefik
 
   sonarr:
     container_name: sonarr
@@ -38,7 +38,7 @@ services:
       - ${MEDIA_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
     networks:
-      - media-server
+      - traefik
 
   radarr:
     container_name: radarr
@@ -58,7 +58,7 @@ services:
       - ${MEDIA_PATH}:/movies
       - ${DOWNLOADS_PATH}:/downloads
     networks:
-      - media-server
+      - traefik
 
   jackett:
     container_name: jackett
@@ -74,8 +74,8 @@ services:
       - ${CONFIGS_PATH}/jackett:/config
       - ${DOWNLOADS_PATH}:/downloads
     networks:
-      - media-server
+      - traefik
 
 networks:
-  media-server:
+  traefik:
     external: true
