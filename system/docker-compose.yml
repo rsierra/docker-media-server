@@ -53,7 +53,7 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${CONFIGS_PATH}/portainer:/data
+      - ${CONFIG_PATH}/portainer:/data
     networks:
         - traefik
     labels:
@@ -77,7 +77,7 @@ services:
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${CONFIGS_PATH}/traefik:/etc/traefik
+      - ${CONFIG_PATH}/traefik:/etc/traefik
     networks:
       - default
       - traefik

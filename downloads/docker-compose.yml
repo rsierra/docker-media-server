@@ -34,7 +34,7 @@ services:
       PGID: ${PGID}
       TZ: ${TIMEZONE}
     volumes:
-      - ${CONFIGS_PATH}/transmission:/config
+      - ${CONFIG_PATH}/transmission:/config
       - ${DOWNLOADS_PATH}/watch:/watch
       - ${DOWNLOADS_PATH}:/downloads
     networks:
@@ -59,7 +59,7 @@ services:
       PGID: ${PGID}
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
-      - ${CONFIGS_PATH}/sonarr:/config
+      - ${CONFIG_PATH}/sonarr:/config
       - ${MEDIA_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
     networks:
@@ -84,7 +84,7 @@ services:
       PGID: ${PGID}
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
-      - ${CONFIGS_PATH}/radarr:/config
+      - ${CONFIG_PATH}/radarr:/config
       - ${MEDIA_PATH}:/movies
       - ${DOWNLOADS_PATH}:/downloads
     networks:
@@ -106,7 +106,7 @@ services:
       PGID: ${PGID}
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
-      - ${CONFIGS_PATH}/jackett:/config
+      - ${CONFIG_PATH}/jackett:/config
       - ${DOWNLOADS_PATH}:/downloads
     networks:
       - traefik

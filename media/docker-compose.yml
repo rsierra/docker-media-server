@@ -42,7 +42,7 @@ services:
       PLEX_CLAIM: ${PLEX_CLAIM}
       ADVERTISE_IP: "http://${HOST_IP}:32400/"
     volumes:
-      - ${CONFIGS_PATH}/plex:/config
+      - ${CONFIG_PATH}/plex:/config
       - ${PLEX_TRANSCODING_PATH}:/transcode
       - ${MEDIA_PATH}:/data
     networks:
@@ -64,7 +64,7 @@ services:
       PGID: ${PGID}
       TZ: ${TIMEZONE}
     volumes:
-      - ${CONFIGS_PATH}/tautulli:/config
+      - ${CONFIG_PATH}/tautulli:/config
       - ${LOGS_PATH}/tautulli:/logs
     networks:
       - traefik
@@ -86,7 +86,7 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
-      - ${CONFIGS_PATH}/ombi:/config
+      - ${CONFIG_PATH}/ombi:/config
     networks:
       - traefik
     labels:
