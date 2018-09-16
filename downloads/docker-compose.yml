@@ -1,5 +1,25 @@
 version: '3.5'
 
+x-traefik-default-labels: &traefik-default-labels
+  traefik.backend: BACKEND
+  traefik.frontend.rule: "Host:SUBDOMAIN.${DOMAIN_NAME}"
+  traefik.port: PORT
+  traefik.enable: true
+  traefik.docker.network: traefik
+  traefik.frontend.headers.SSLRedirect: true
+  traefik.frontend.headers.STSSeconds: 315360000
+  traefik.frontend.headers.browserXSSFilter: true
+  traefik.frontend.headers.contentTypeNosniff: true
+  traefik.frontend.headers.forceSTSHeader: true
+  traefik.frontend.headers.SSLHost: ${DOMAIN_NAME}
+  traefik.frontend.headers.STSIncludeSubdomains: true
+  traefik.frontend.headers.STSPreload: true
+  traefik.frontend.headers.frameDeny: true
+
+x-traefik-auth-labels: &traefik-auth-labels
+  <<: *traefik-default-labels
+  traefik.frontend.auth.basic: ${HTTP_AUTH}
+
 services:
   transmission:
     container_name: transmission
@@ -19,6 +39,11 @@ services:
       - ${DOWNLOADS_PATH}:/downloads
     networks:
       - traefik
+    labels:
+      <<: *traefik-default-labels
+      traefik.backend: transmission
+      traefik.frontend.rule: "Host:transmission.${DOMAIN_NAME}"
+      traefik.port: 9091
 
   sonarr:
     container_name: sonarr
@@ -39,6 +64,11 @@ services:
       - ${DOWNLOADS_PATH}:/downloads
     networks:
       - traefik
+    labels:
+      <<: *traefik-auth-labels
+      traefik.backend: sonarr
+      traefik.frontend.rule: "Host:sonarr.${DOMAIN_NAME}"
+      traefik.port: 8989
 
   radarr:
     container_name: radarr
@@ -59,6 +89,11 @@ services:
       - ${DOWNLOADS_PATH}:/downloads
     networks:
       - traefik
+    labels:
+      <<: *auth-labels
+      traefik.backend: radarr
+      traefik.frontend.rule: "Host:radarr.${DOMAIN_NAME}"
+      traefik.port: 8989
 
   jackett:
     container_name: jackett
@@ -75,6 +110,11 @@ services:
       - ${DOWNLOADS_PATH}:/downloads
     networks:
       - traefik
+    labels:
+      <<: *auth-labels
+      traefik.backend: jackett
+      traefik.frontend.rule: "Host:jackett.${DOMAIN_NAME}"
+      traefik.port: 9117
 
 networks:
   traefik:
