@@ -81,7 +81,7 @@ services:
       - default
       - traefik
     labels:
-      <<: *auth-labels
+      <<: *traefik-auth-labels
       traefik.backend: traefik
       traefik.frontend.rule: "Host:traefik.${SERVER_DOMAIN}"
       traefik.port: 8080
