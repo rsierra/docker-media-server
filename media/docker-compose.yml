@@ -2,7 +2,7 @@ version: '3.5'
 
 x-traefik-default-labels: &traefik-default-labels
   traefik.backend: BACKEND
-  traefik.frontend.rule: "Host:SUBDOMAIN.${DOMAIN_NAME}"
+  traefik.frontend.rule: "Host:SERVICE.${SERVER_DOMAIN}"
   traefik.port: PORT
   traefik.enable: true
   traefik.docker.network: traefik
@@ -11,7 +11,7 @@ x-traefik-default-labels: &traefik-default-labels
   traefik.frontend.headers.browserXSSFilter: true
   traefik.frontend.headers.contentTypeNosniff: true
   traefik.frontend.headers.forceSTSHeader: true
-  traefik.frontend.headers.SSLHost: ${DOMAIN_NAME}
+  traefik.frontend.headers.SSLHost: ${ROOT_DOMAIN}
   traefik.frontend.headers.STSIncludeSubdomains: true
   traefik.frontend.headers.STSPreload: true
   traefik.frontend.headers.frameDeny: true
@@ -50,7 +50,7 @@ services:
     labels:
       <<: *traefik-default-labels
       traefik.backend: plex
-      traefik.frontend.rule: "Host:plex.${DOMAIN_NAME}"
+      traefik.frontend.rule: "Host:plex.${SERVER_DOMAIN}"
       traefik.port: 32400
 
   tautulli:
@@ -71,7 +71,7 @@ services:
     labels:
       <<: *traefik-auth-labels
       traefik.backend: tautulli
-      traefik.frontend.rule: "Host:tautulli.${DOMAIN_NAME}"
+      traefik.frontend.rule: "Host:tautulli.${SERVER_DOMAIN}"
       traefik.port: 8181
 
   ombi:
@@ -92,7 +92,7 @@ services:
     labels:
       <<: *traefik-default-labels
       traefik.backend: ombi
-      traefik.frontend.rule: "Host:ombi.${DOMAIN_NAME}"
+      traefik.frontend.rule: "Host:ombi.${SERVER_DOMAIN}"
       traefik.port: 3579
 
 networks:
