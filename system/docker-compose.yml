@@ -37,6 +37,25 @@ services:
     networks:
         - media-server
 
+  traefik:
+    container_name: traefik
+    image: traefik
+    restart: unless-stopped
+    domainname: ${DOMAIN_NAME}
+    networks:
+      - default
+      - media-server
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${CONFIGS_PATH}/traefik:/etc/traefik
+
 networks:
   media-server:
     name: media-server
