@@ -93,7 +93,7 @@ services:
       <<: *traefik-auth-labels
       traefik.backend: radarr
       traefik.frontend.rule: "Host:radarr.${SERVER_DOMAIN}"
-      traefik.port: 8989
+      traefik.port: 7878
 
   jackett:
     container_name: jackett
