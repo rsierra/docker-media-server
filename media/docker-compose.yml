@@ -1,0 +1,100 @@
+version: '3.5'
+
+x-traefik-default-labels: &traefik-default-labels
+  traefik.backend: BACKEND
+  traefik.frontend.rule: "Host:SUBDOMAIN.${DOMAIN_NAME}"
+  traefik.port: PORT
+  traefik.enable: true
+  traefik.docker.network: traefik
+  traefik.frontend.headers.SSLRedirect: true
+  traefik.frontend.headers.STSSeconds: 315360000
+  traefik.frontend.headers.browserXSSFilter: true
+  traefik.frontend.headers.contentTypeNosniff: true
+  traefik.frontend.headers.forceSTSHeader: true
+  traefik.frontend.headers.SSLHost: ${DOMAIN_NAME}
+  traefik.frontend.headers.STSIncludeSubdomains: true
+  traefik.frontend.headers.STSPreload: true
+  traefik.frontend.headers.frameDeny: true
+
+x-traefik-auth-labels: &traefik-auth-labels
+  <<: *traefik-default-labels
+  traefik.frontend.auth.basic: ${HTTP_AUTH}
+
+services:
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker:${PLEX_VERSION}
+    restart: unless-stopped
+    ports:
+      - "32400:32400/tcp"
+      - "3005:3005/tcp"
+      - "8324:8324/tcp"
+      - "32469:32469/tcp"
+      - "1900:1900/udp"
+      - "32410:32410/udp"
+      - "32412:32412/udp"
+      - "32413:32413/udp"
+      - "32414:32414/udp"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+      PLEX_CLAIM: ${PLEX_CLAIM}
+      ADVERTISE_IP: "http://${HOST_IP}:32400/"
+    volumes:
+      - ${CONFIGS_PATH}/plex:/config
+      - ${PLEX_TRANSCODING_PATH}:/transcode
+      - ${MEDIA_PATH}:/data
+    networks:
+      - traefik
+    labels:
+      <<: *traefik-default-labels
+      traefik.backend: plex
+      traefik.frontend.rule: "Host:plex.${DOMAIN_NAME}"
+      traefik.port: 32400
+
+  tautulli:
+    container_name: tautulli
+    image: linuxserver/tautulli
+    restart: unless-stopped
+    ports:
+      - "8181:8181"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIGS_PATH}/tautulli:/config
+      - ${LOGS_PATH}/tautulli:/logs
+    networks:
+      - traefik
+    labels:
+      <<: *traefik-auth-labels
+      traefik.backend: tautulli
+      traefik.frontend.rule: "Host:tautulli.${DOMAIN_NAME}"
+      traefik.port: 8181
+
+  ombi:
+    container_name: ombi
+    image: linuxserver/ombi
+    restart: unless-stopped
+    ports:
+      - "3579:3579"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
+      - ${CONFIGS_PATH}/ombi:/config
+    networks:
+      - traefik
+    labels:
+      <<: *traefik-default-labels
+      traefik.backend: ombi
+      traefik.frontend.rule: "Host:ombi.${DOMAIN_NAME}"
+      traefik.port: 3579
+
+networks:
+  traefik:
+    external: true

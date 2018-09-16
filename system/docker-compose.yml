@@ -1,0 +1,95 @@
+version: '3.5'
+
+x-traefik-default-labels: &traefik-default-labels
+  traefik.backend: BACKEND
+  traefik.frontend.rule: "Host:SUBDOMAIN.${DOMAIN_NAME}"
+  traefik.port: PORT
+  traefik.enable: true
+  traefik.docker.network: traefik
+  traefik.frontend.headers.SSLRedirect: true
+  traefik.frontend.headers.STSSeconds: 315360000
+  traefik.frontend.headers.browserXSSFilter: true
+  traefik.frontend.headers.contentTypeNosniff: true
+  traefik.frontend.headers.forceSTSHeader: true
+  traefik.frontend.headers.SSLHost: ${DOMAIN_NAME}
+  traefik.frontend.headers.STSIncludeSubdomains: true
+  traefik.frontend.headers.STSPreload: true
+  traefik.frontend.headers.frameDeny: true
+
+x-traefik-auth-labels: &traefik-auth-labels
+  <<: *traefik-default-labels
+  traefik.frontend.auth.basic: ${HTTP_AUTH}
+
+services:
+  ddclient:
+    container_name: ddclient
+    image: linuxserver/ddclient
+    restart: unless-stopped
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/ddclient:/config
+
+  watchtower:
+    container_name: watchtower
+    image: v2tec/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer
+    restart: unless-stopped
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - "9000:9000"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CONFIGS_PATH}/portainer:/data
+    networks:
+        - traefik
+    labels:
+      <<: *traefik-default-labels
+      traefik.backend: portainer
+      traefik.frontend.rule: "Host:portainer.${DOMAIN_NAME}"
+      traefik.port: 9000
+
+  traefik:
+    container_name: traefik
+    image: traefik
+    restart: unless-stopped
+    domainname: ${DOMAIN_NAME}
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${CONFIGS_PATH}/traefik:/etc/traefik
+    networks:
+      - default
+      - traefik
+    labels:
+      <<: *auth-labels
+      traefik.backend: traefik
+      traefik.frontend.rule: "Host:traefik.${DOMAIN_NAME}"
+      traefik.port: 8080
+
+networks:
+  traefik:
+    name: traefik
+    driver: bridge
+  default:
+    driver: bridge
