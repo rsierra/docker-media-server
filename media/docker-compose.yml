@@ -65,7 +65,7 @@ services:
       TZ: ${TIMEZONE}
     volumes:
       - ${CONFIG_PATH}/tautulli:/config
-      - ${LOGS_PATH}/tautulli:/logs
+      - ${CONFIG_PATH}/plex/Library/Application\ Support/Plex\ Media\ Server/Logs:/logs:ro
     networks:
       - traefik
     labels:
