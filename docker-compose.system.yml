@@ -14,7 +14,7 @@ x-traefik-default-labels: &traefik-default-labels
   traefik.frontend.headers.SSLHost: ${ROOT_DOMAIN}
   traefik.frontend.headers.STSIncludeSubdomains: true
   traefik.frontend.headers.STSPreload: true
-  traefik.frontend.headers.frameDeny: true
+  traefik.frontend.headers.frameDeny: "allow-from https://*.${SERVER_DOMAIN}"
 
 x-traefik-auth-labels: &traefik-auth-labels
   <<: *traefik-default-labels
