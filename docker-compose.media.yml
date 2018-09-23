@@ -44,7 +44,7 @@ services:
     volumes:
       - ${CONFIG_PATH}/plex:/config
       - ${PLEX_TRANSCODING_PATH}:/transcode
-      - ${MEDIA_PATH}:/data
+      - ${REMOTE_MEDIA_PATH}:/data
     networks:
       - traefik
     labels:

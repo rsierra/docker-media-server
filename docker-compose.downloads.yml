@@ -60,8 +60,8 @@ services:
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
       - ${CONFIG_PATH}/sonarr:/config
-      - ${MEDIA_PATH}:/tv
       - ${DOWNLOADS_PATH}:/downloads
+      - ${LOCAL_MEDIA_PATH}:/tv
     networks:
       - traefik
     labels:
@@ -85,8 +85,8 @@ services:
     volumes:
       - ${LOCALTIME_PATH}:/etc/localtime:ro
       - ${CONFIG_PATH}/radarr:/config
-      - ${MEDIA_PATH}:/movies
       - ${DOWNLOADS_PATH}:/downloads
+      - ${LOCAL_MEDIA_PATH}:/movies
     networks:
       - traefik
     labels:
