@@ -60,6 +60,27 @@ services:
       traefik.frontend.rule: "Host:muximux.${SERVER_DOMAIN}"
       traefik.port: 80
 
+  glances:
+    container_name: glances
+    image: nicolargo/glances
+    restart: unless-stopped
+    pid: host
+    ports:
+      - "61208:61208"
+      - "61209:61209"
+    environment:
+      GLANCES_OPT: -w
+    volumes:
+      - ${DOCKER_SOCKET}:/var/run/docker.sock:ro
+      - ${CONFIG_PATH}/glances:/glances/conf
+    networks:
+        - traefik
+    labels:
+      <<: *traefik-auth-labels
+      traefik.backend: glances
+      traefik.frontend.rule: "Host:glances.${SERVER_DOMAIN}"
+      traefik.port: 61208
+
   portainer:
     container_name: portainer
     image: portainer/portainer
