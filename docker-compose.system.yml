@@ -40,6 +40,26 @@ services:
       - ${DOCKER_SOCKET}:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
 
+  muximux:
+    container_name: muximux
+    image: linuxserver/muximux
+    restart: unless-stopped
+    ports:
+      - "8888:80"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/muximux:/config
+    networks:
+        - traefik
+    labels:
+      <<: *traefik-auth-labels
+      traefik.backend: muximux
+      traefik.frontend.rule: "Host:muximux.${SERVER_DOMAIN}"
+      traefik.port: 80
+
   portainer:
     container_name: portainer
     image: portainer/portainer
