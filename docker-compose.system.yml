@@ -119,7 +119,6 @@ services:
       - ${DOCKER_SOCKET}:/var/run/docker.sock:ro
       - ${CONFIG_PATH}/traefik:/etc/traefik
     networks:
-      - default
       - traefik
     labels:
       <<: *traefik-auth-labels
@@ -130,6 +129,4 @@ services:
 networks:
   traefik:
     name: traefik
-    driver: bridge
-  default:
     driver: bridge
