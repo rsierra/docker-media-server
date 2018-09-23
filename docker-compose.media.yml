@@ -74,27 +74,6 @@ services:
       traefik.frontend.rule: "Host:tautulli.${SERVER_DOMAIN}"
       traefik.port: 8181
 
-  ombi:
-    container_name: ombi
-    image: linuxserver/ombi
-    restart: unless-stopped
-    ports:
-      - "3579:3579"
-    environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TIMEZONE}
-    volumes:
-      - ${LOCALTIME_PATH}:/etc/localtime:ro
-      - ${CONFIG_PATH}/ombi:/config
-    networks:
-      - traefik
-    labels:
-      <<: *traefik-default-labels
-      traefik.backend: ombi
-      traefik.frontend.rule: "Host:ombi.${SERVER_DOMAIN}"
-      traefik.port: 3579
-
 networks:
   traefik:
     external: true
