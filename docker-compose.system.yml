@@ -174,7 +174,8 @@ services:
       - ${CONFIG_PATH}/pihole:/etc/pihole
     networks:
       - traefik
-    cap_add: NET_ADMIN
+    cap_add:
+      - NET_ADMIN
     labels:
       <<: *traefik-auth-labels
       traefik.backend: pihole
