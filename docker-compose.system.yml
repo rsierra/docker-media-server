@@ -126,6 +126,32 @@ services:
       traefik.frontend.rule: "Host:traefik.${SERVER_DOMAIN}"
       traefik.port: 8080
 
+  pihole:
+    container_name: pihole
+    image: pihole/pihole
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "8088:80"
+    environment:
+      TZ: ${TIMEZONE}
+      ServerIP: ${HOST_IP}
+      #ServerIPv6: ${HOST_IP}
+      VIRTUAL_HOST: ${HOST_IP}:8088
+    volumes:
+      - ${CONFIG_PATH}/dnsmasq.d:/etc/dnsmasq.d
+      - ${CONFIG_PATH}/pihole:/etc/pihole
+    networks:
+      - traefik
+    cap_add: NET_ADMIN
+    labels:
+      <<: *traefik-auth-labels
+      traefik.backend: pihole
+      traefik.frontend.rule: "Host:pihole.${SERVER_DOMAIN}"
+      traefik.port: 8088
+
 networks:
   traefik:
     name: traefik
