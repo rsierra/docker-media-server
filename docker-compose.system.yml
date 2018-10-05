@@ -180,7 +180,7 @@ services:
       <<: *traefik-auth-labels
       traefik.backend: pihole
       traefik.frontend.rule: "Host:pihole.${SERVER_DOMAIN}"
-      traefik.port: 8088
+      traefik.port: 80
 
 networks:
   traefik:
