@@ -60,26 +60,55 @@ services:
       traefik.frontend.rule: "Host:muximux.${SERVER_DOMAIN}"
       traefik.port: 80
 
+  influxdb:
+    container_name: influxdb
+    image: influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/influxdb:/var/lib/influxdb
+    networks:
+      - system
+
   glances:
     container_name: glances
     image: nicolargo/glances
     restart: unless-stopped
+    depends_on:
+      - influxdb
     pid: host
-    ports:
-      - "61208:61208"
-      - "61209:61209"
     environment:
-      GLANCES_OPT: -w
+      GLANCES_OPT: --quiet --export influxdb
     volumes:
       - ${DOCKER_SOCKET}:/var/run/docker.sock:ro
       - ${CONFIG_PATH}/glances:/glances/conf
     networks:
+      - system
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    ports:
+      - "3000:3000"
+    user: ${PUID}
+    volumes:
+      - ${CONFIG_PATH}/grafana:/var/lib/grafana
+    networks:
+        - system
         - traefik
     labels:
-      <<: *traefik-auth-labels
-      traefik.backend: glances
-      traefik.frontend.rule: "Host:glances.${SERVER_DOMAIN}"
-      traefik.port: 61208
+      <<: *traefik-default-labels
+      traefik.backend: grafana
+      traefik.frontend.rule: "Host:grafana.${SERVER_DOMAIN}"
+      traefik.port: 3000
 
   portainer:
     container_name: portainer
@@ -107,7 +136,7 @@ services:
     container_name: traefik
     image: traefik
     restart: unless-stopped
-    domainname: ${SERVER_DOMAIN}
+    command: --api --docker
     ports:
       - "80:80"
       - "443:443"
@@ -154,4 +183,6 @@ services:
 
 networks:
   traefik:
+    driver: bridge
+  system:
     driver: bridge
