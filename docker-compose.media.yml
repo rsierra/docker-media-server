@@ -94,7 +94,3 @@ services:
       traefik.backend: ombi
       traefik.frontend.rule: "Host:ombi.${SERVER_DOMAIN}"
       traefik.port: 3579
-
-networks:
-  traefik:
-    external: true

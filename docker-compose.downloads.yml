@@ -115,7 +115,3 @@ services:
       traefik.backend: jackett
       traefik.frontend.rule: "Host:jackett.${SERVER_DOMAIN}"
       traefik.port: 9117
-
-networks:
-  traefik:
-    external: true
