@@ -21,6 +21,28 @@ x-traefik-auth-labels: &traefik-auth-labels
   traefik.frontend.auth.basic: ${HTTP_AUTH}
 
 services:
+  calibre-web:
+    container_name: calibre-web
+    image: linuxserver/calibre-web
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/calibre-web:/config
+      - ${REMOTE_MEDIA_PATH}/reading/books:/books
+      - ${KINDLEGEN_BIN}:/app/calibre-web/vendor/kindlegen
+    networks:
+      - traefik
+    labels:
+      <<: *traefik-default-labels
+      traefik.backend: calibre
+      traefik.frontend.rule: "Host:calibre.${SERVER_DOMAIN}"
+      traefik.port: 8083
+
   plex:
     container_name: plex
     image: plexinc/pms-docker:${PLEX_VERSION}
