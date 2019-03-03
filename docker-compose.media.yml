@@ -43,6 +43,30 @@ services:
       traefik.frontend.rule: "Host:calibre.${SERVER_DOMAIN}"
       traefik.port: 8083
 
+  ubooquity:
+    container_name: ubooquity
+    image: linuxserver/ubooquity
+    restart: unless-stopped
+    ports:
+      - "2202:2202"
+      - "2203:2203"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/ubooquity:/config
+      - ${UNION_MEDIA_PATH}/reading/comics:/comics
+      - ${EMPTY_PATH}:/files
+      - ${EMPTY_PATH}:/books
+    networks:
+      - traefik
+    labels:
+      <<: *traefik-default-labels
+      traefik.backend: ubooquity
+      traefik.frontend.rule: "Host:ubooquity.${SERVER_DOMAIN}"
+      traefik.port: 2202
+
   plex:
     container_name: plex
     image: plexinc/pms-docker:${PLEX_VERSION}
@@ -91,7 +115,7 @@ services:
     networks:
       - traefik
     labels:
-      <<: *traefik-auth-labels
+      <<: *traefik-default-labels
       traefik.backend: tautulli
       traefik.frontend.rule: "Host:tautulli.${SERVER_DOMAIN}"
       traefik.port: 8181
