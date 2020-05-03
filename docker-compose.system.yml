@@ -1,25 +1,5 @@
 version: '3.5'
 
-x-traefik-default-labels: &traefik-default-labels
-  traefik.backend: BACKEND
-  traefik.frontend.rule: "Host:SERVICE.${SERVER_DOMAIN}"
-  traefik.port: PORT
-  traefik.enable: true
-  traefik.docker.network: traefik
-  traefik.frontend.headers.SSLRedirect: true
-  traefik.frontend.headers.STSSeconds: 315360000
-  traefik.frontend.headers.browserXSSFilter: true
-  traefik.frontend.headers.contentTypeNosniff: true
-  traefik.frontend.headers.forceSTSHeader: true
-  traefik.frontend.headers.SSLHost: ${ROOT_DOMAIN}
-  traefik.frontend.headers.STSIncludeSubdomains: true
-  traefik.frontend.headers.STSPreload: true
-  traefik.frontend.headers.frameDeny: false
-
-x-traefik-auth-labels: &traefik-auth-labels
-  <<: *traefik-default-labels
-  traefik.frontend.auth.basic: ${HTTP_AUTH}
-
 services:
   ddclient:
     container_name: ddclient
@@ -34,11 +14,11 @@ services:
 
   watchtower:
     container_name: watchtower
-    image: v2tec/watchtower
+    image: containrrr/watchtower
     restart: unless-stopped
+    command: --schedule "0 0 4 * * *" --cleanup
     volumes:
       - ${DOCKER_SOCKET}:/var/run/docker.sock
-    command: --schedule "0 0 4 * * *" --cleanup
 
   muximux:
     container_name: muximux
@@ -55,66 +35,53 @@ services:
     networks:
         - traefik
     labels:
-      <<: *traefik-auth-labels
-      traefik.backend: muximux
-      traefik.frontend.rule: "Host:muximux.${SERVER_DOMAIN}"
-      traefik.port: 80
-
-  influxdb:
-    container_name: influxdb
-    image: influxdb
+      traefik.enable: true
+      traefik.http.middlewares.muximux-auth.basicauth.usersfile: /etc/traefik/.htpasswd.priv
+      traefik.http.routers.muximux-secure.entrypoints: https
+      traefik.http.routers.muximux-secure.rule: Host(`muximux.${SERVER_DOMAIN}`)
+      traefik.http.routers.muximux-secure.middlewares: muximux-auth
+      traefik.http.routers.muximux-secure.tls: true
+      traefik.http.routers.muximux-secure.service: muximux
+      traefik.http.services.muximux.loadbalancer.server.port: 80
+      traefik.docker.network: traefik
+      
+  netdata:
+    container_name: netdata
+    image: netdata/netdata
     restart: unless-stopped
+    hostname: GLaDOS
     ports:
-      - "8086:8086"
-    environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TIMEZONE}
+      - "19999:19999"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
     volumes:
-      - ${CONFIG_PATH}/influxdb:/var/lib/influxdb
-    networks:
-      - system
-
-  glances:
-    container_name: glances
-    image: nicolargo/glances
-    restart: unless-stopped
-    depends_on:
-      - influxdb
-    pid: host
-    environment:
-      GLANCES_OPT: --quiet --export influxdb
-    volumes:
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
       - ${DOCKER_SOCKET}:/var/run/docker.sock:ro
-      - ${CONFIG_PATH}/glances:/glances/conf
     networks:
-      - system
-
-  grafana:
-    container_name: grafana
-    image: grafana/grafana
-    restart: unless-stopped
-    depends_on:
-      - influxdb
-    ports:
-      - "3000:3000"
-    user: ${PUID}
-    volumes:
-      - ${CONFIG_PATH}/grafana:/var/lib/grafana
-    networks:
-        - system
-        - traefik
+      - traefik
     labels:
-      <<: *traefik-default-labels
-      traefik.backend: grafana
-      traefik.frontend.rule: "Host:grafana.${SERVER_DOMAIN}"
-      traefik.port: 3000
-
+      traefik.enable: true
+      traefik.http.middlewares.netdata-auth.basicauth.usersfile: /etc/traefik/.htpasswd.priv
+      traefik.http.routers.netdata-secure.entrypoints: https
+      traefik.http.routers.netdata-secure.rule: Host(`netdata.${SERVER_DOMAIN}`)
+      traefik.http.routers.netdata-secure.middlewares: netdata-auth
+      traefik.http.routers.netdata-secure.tls: true
+      traefik.http.routers.netdata-secure.service: netdata
+      traefik.http.services.netdata.loadbalancer.server.port: 19999
+      traefik.docker.network: traefik
+      
   portainer:
     container_name: portainer
     image: portainer/portainer
     restart: unless-stopped
-    command: -H unix:///var/run/docker.sock
+    security_opt:
+      - no-new-privileges:true
+    command: -H unix://${DOCKER_SOCKET}
     ports:
       - "9000:9000"
     environment:
@@ -127,33 +94,44 @@ services:
     networks:
         - traefik
     labels:
-      <<: *traefik-default-labels
-      traefik.backend: portainer
-      traefik.frontend.rule: "Host:portainer.${SERVER_DOMAIN}"
-      traefik.port: 9000
+      traefik.enable: true
+      traefik.http.routers.portainer-secure.entrypoints: https
+      traefik.http.routers.portainer-secure.rule: Host(`portainer.${SERVER_DOMAIN}`)
+      traefik.http.routers.portainer-secure.tls: true
+      traefik.http.routers.portainer-secure.service: portainer
+      traefik.http.services.portainer.loadbalancer.server.port: 9000
+      traefik.docker.network: traefik
 
   traefik:
     container_name: traefik
-    image: traefik
+    image: traefik:v2.0
     restart: unless-stopped
-    command: --api --docker
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080"
     environment:
-      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
-      - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+      CF_API_EMAIL: ${CLOUDFLARE_EMAIL}
+      CF_API_KEY: ${CLOUDFLARE_API_KEY}
     volumes:
       - ${DOCKER_SOCKET}:/var/run/docker.sock:ro
+      - ${LOCALTIME_PATH}:/etc/localtime:ro
       - ${CONFIG_PATH}/traefik:/etc/traefik
     networks:
       - traefik
     labels:
-      <<: *traefik-auth-labels
-      traefik.backend: traefik
-      traefik.frontend.rule: "Host:traefik.${SERVER_DOMAIN}"
-      traefik.port: 8080
+      traefik.enable: true
+      traefik.http.middlewares.traefik-auth.basicauth.usersfile: /etc/traefik/.htpasswd.priv
+      traefik.http.routers.traefik-secure.entrypoints: https
+      traefik.http.routers.traefik-secure.rule: Host(`traefik.${SERVER_DOMAIN}`)
+      traefik.http.routers.traefik-secure.middlewares: traefik-auth
+      traefik.http.routers.traefik-secure.tls: true
+      traefik.http.routers.traefik-secure.tls.certresolver: cloudflare
+      traefik.http.routers.traefik-secure.tls.domains[0].main: ${SERVER_DOMAIN}
+      traefik.http.routers.traefik-secure.tls.domains[0].sans: "*.${SERVER_DOMAIN}"
+      traefik.http.routers.traefik-secure.service: api@internal
 
   pihole:
     container_name: pihole
@@ -167,23 +145,13 @@ services:
     environment:
       TZ: ${TIMEZONE}
       ServerIP: ${HOST_IP}
-      #ServerIPv6: ${HOST_IP}
       VIRTUAL_HOST: ${HOST_IP}:8088
     volumes:
       - ${CONFIG_PATH}/dnsmasq.d:/etc/dnsmasq.d
       - ${CONFIG_PATH}/pihole:/etc/pihole
-    networks:
-      - traefik
     cap_add:
       - NET_ADMIN
-    labels:
-      <<: *traefik-auth-labels
-      traefik.backend: pihole
-      traefik.frontend.rule: "Host:pihole.${SERVER_DOMAIN}"
-      traefik.port: 80
 
 networks:
   traefik:
-    driver: bridge
-  system:
     driver: bridge

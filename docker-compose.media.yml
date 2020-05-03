@@ -1,26 +1,58 @@
 version: '3.5'
 
-x-traefik-default-labels: &traefik-default-labels
-  traefik.backend: BACKEND
-  traefik.frontend.rule: "Host:SERVICE.${SERVER_DOMAIN}"
-  traefik.port: PORT
-  traefik.enable: true
-  traefik.docker.network: traefik
-  traefik.frontend.headers.SSLRedirect: true
-  traefik.frontend.headers.STSSeconds: 315360000
-  traefik.frontend.headers.browserXSSFilter: true
-  traefik.frontend.headers.contentTypeNosniff: true
-  traefik.frontend.headers.forceSTSHeader: true
-  traefik.frontend.headers.SSLHost: ${ROOT_DOMAIN}
-  traefik.frontend.headers.STSIncludeSubdomains: true
-  traefik.frontend.headers.STSPreload: true
-  traefik.frontend.headers.frameDeny: false
-
-x-traefik-auth-labels: &traefik-auth-labels
-  <<: *traefik-default-labels
-  traefik.frontend.auth.basic: ${HTTP_AUTH}
-
 services:
+  calibre-web:
+    container_name: calibre-web
+    image: linuxserver/calibre-web
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/calibre-web:/config
+      - ${LWC_MEDIA_PATH}/reading/books/calibre:/books
+      - ${KINDLEGEN_BIN}:/app/calibre-web/vendor/kindlegen
+    networks:
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.http.routers.calibre-secure.entrypoints: https
+      traefik.http.routers.calibre-secure.rule: Host(`calibre.${SERVER_DOMAIN}`)
+      traefik.http.routers.calibre-secure.tls: true
+      traefik.http.routers.calibre-secure.service: calibre
+      traefik.http.services.calibre.loadbalancer.server.port: 8083
+      traefik.docker.network: traefik
+      
+  ubooquity:
+    container_name: ubooquity
+    image: linuxserver/ubooquity
+    restart: unless-stopped
+    ports:
+      - "2202:2202"
+      - "2203:2203"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/ubooquity:/config
+      - ${LWC_MEDIA_PATH}/reading/comics:/comics
+      - ${EMPTY_PATH}:/files
+      - ${EMPTY_PATH}:/books      
+    networks:
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ubooquity-secure.entrypoints: https
+      traefik.http.routers.ubooquity-secure.rule: Host(`ubooquity.${SERVER_DOMAIN}`)
+      traefik.http.routers.ubooquity-secure.tls: true
+      traefik.http.routers.ubooquity-secure.service: ubooquity
+      traefik.http.services.ubooquity.loadbalancer.server.port: 2202
+      traefik.docker.network: traefik    
+
   plex:
     container_name: plex
     image: plexinc/pms-docker:${PLEX_VERSION}
@@ -43,15 +75,46 @@ services:
       ADVERTISE_IP: "http://${HOST_IP}:32400/"
     volumes:
       - ${CONFIG_PATH}/plex:/config
-      - ${PLEX_TRANSCODING_PATH}:/transcode
-      - ${REMOTE_MEDIA_PATH}:/data
+      - ${TMP_PATH}/plex/transcode:/transcode
+      - ${UNION_MEDIA_PATH}:/data
     networks:
       - traefik
     labels:
-      <<: *traefik-default-labels
-      traefik.backend: plex
-      traefik.frontend.rule: "Host:plex.${SERVER_DOMAIN}"
-      traefik.port: 32400
+      traefik.enable: true
+      traefik.http.routers.plex-secure.entrypoints: https
+      traefik.http.routers.plex-secure.rule: Host(`plex.${SERVER_DOMAIN}`)
+      traefik.http.routers.plex-secure.tls: true
+      traefik.http.routers.plex-secure.service: plex
+      traefik.http.services.plex.loadbalancer.server.port: 32400
+      traefik.docker.network: traefik
+      
+  jellyfin:
+    container_name: jellyfin
+    image: linuxserver/jellyfin
+    restart: unless-stopped
+    ports:
+      - "8096:8096"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/jellyfin:/config
+      - ${TMP_PATH}/jellyfin/transcode:/transcode
+      - ${UNION_MEDIA_PATH}:/media
+      - ${DATA_PATH}/upload:/upload
+      - ${LWC_MEDIA_PATH}/multimedia:/multimedia
+      - ${LWC_MEDIA_PATH}/music:/music
+    networks:
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.http.routers.jellyfin-secure.entrypoints: https
+      traefik.http.routers.jellyfin-secure.rule: Host(`jellyfin.${SERVER_DOMAIN}`)
+      traefik.http.routers.jellyfin-secure.tls: true
+      traefik.http.routers.jellyfin-secure.service: jellyfin
+      traefik.http.services.jellyfin.loadbalancer.server.port: 8096
+      traefik.docker.network: traefik
 
   tautulli:
     container_name: tautulli
@@ -69,10 +132,13 @@ services:
     networks:
       - traefik
     labels:
-      <<: *traefik-auth-labels
-      traefik.backend: tautulli
-      traefik.frontend.rule: "Host:tautulli.${SERVER_DOMAIN}"
-      traefik.port: 8181
+      traefik.enable: true
+      traefik.http.routers.tautulli-secure.entrypoints: https
+      traefik.http.routers.tautulli-secure.rule: Host(`tautulli.${SERVER_DOMAIN}`)
+      traefik.http.routers.tautulli-secure.tls: true
+      traefik.http.routers.tautulli-secure.service: tautulli
+      traefik.http.services.tautulli.loadbalancer.server.port: 8181
+      traefik.docker.network: traefik
 
   ombi:
     container_name: ombi
@@ -90,7 +156,32 @@ services:
     networks:
       - traefik
     labels:
-      <<: *traefik-default-labels
-      traefik.backend: ombi
-      traefik.frontend.rule: "Host:ombi.${SERVER_DOMAIN}"
-      traefik.port: 3579
+      traefik.enable: true
+      traefik.http.routers.ombi-secure.entrypoints: https
+      traefik.http.routers.ombi-secure.rule: Host(`ombi.${SERVER_DOMAIN}`)
+      traefik.http.routers.ombi-secure.tls: true
+      traefik.http.routers.ombi-secure.service: ombi
+      traefik.http.services.ombi.loadbalancer.server.port: 3579
+      traefik.docker.network: traefik
+
+  3ds:
+    container_name: 3ds
+    image: maguilag/file-qrs
+    restart: unless-stopped    
+    ports:
+      - "8100:8100"
+    environment:
+      HTPASSWD_FILE: /.htpasswd
+    volumes:
+      - ${LWC_MEDIA_PATH}/videogames/3ds:/files
+      - ${CONFIG_PATH}/traefik/.htpasswd.pub:/.htpasswd
+    networks:
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.http.routers.3ds-secure.entrypoints: https
+      traefik.http.routers.3ds-secure.rule: Host(`3ds.${SERVER_DOMAIN}`)
+      traefik.http.routers.3ds-secure.tls: true
+      traefik.http.routers.3ds-secure.service: 3ds
+      traefik.http.services.3ds.loadbalancer.server.port: 8100
+      traefik.docker.network: traefik

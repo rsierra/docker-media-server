@@ -1,26 +1,26 @@
 version: '3.5'
 
-x-traefik-default-labels: &traefik-default-labels
-  traefik.backend: BACKEND
-  traefik.frontend.rule: "Host:SERVICE.${SERVER_DOMAIN}"
-  traefik.port: PORT
-  traefik.enable: true
-  traefik.docker.network: traefik
-  traefik.frontend.headers.SSLRedirect: true
-  traefik.frontend.headers.STSSeconds: 315360000
-  traefik.frontend.headers.browserXSSFilter: true
-  traefik.frontend.headers.contentTypeNosniff: true
-  traefik.frontend.headers.forceSTSHeader: true
-  traefik.frontend.headers.SSLHost: ${ROOT_DOMAIN}
-  traefik.frontend.headers.STSIncludeSubdomains: true
-  traefik.frontend.headers.STSPreload: true
-  traefik.frontend.headers.frameDeny: false
-
-x-traefik-auth-labels: &traefik-auth-labels
-  <<: *traefik-default-labels
-  traefik.frontend.auth.basic: ${HTTP_AUTH}
-
 services:
+  amule:
+    container_name: amule
+    image: tchabaud/amule
+    restart: unless-stopped
+    ports:
+      - "4711:4711"
+      - "4712:4712"
+      - "4662:4662"
+      - "4665:4665/udp"
+      - "4672:4672/udp"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${CONFIG_PATH}/amule/config:/home/amule/.aMule
+      - ${CONFIG_PATH}/amule/webserver:/usr/share/amule/webserver
+      - ${DOWNLOADS_PATH}/amule/complete:/incoming
+      - ${DOWNLOADS_PATH}/amule/incomplete:/temp
+
   transmission:
     container_name: transmission
     image: linuxserver/transmission
@@ -40,14 +40,17 @@ services:
     networks:
       - traefik
     labels:
-      <<: *traefik-default-labels
-      traefik.backend: transmission
-      traefik.frontend.rule: "Host:transmission.${SERVER_DOMAIN}"
-      traefik.port: 9091
+      traefik.enable: true
+      traefik.http.routers.transmission-secure.entrypoints: https
+      traefik.http.routers.transmission-secure.rule: Host(`transmission.${SERVER_DOMAIN}`)
+      traefik.http.routers.transmission-secure.tls: true
+      traefik.http.routers.transmission-secure.service: transmission
+      traefik.http.services.transmission.loadbalancer.server.port: 9091
+      traefik.docker.network: traefik
 
   sonarr:
     container_name: sonarr
-    image: linuxserver/sonarr
+    image: linuxserver/sonarr:preview
     restart: unless-stopped
     depends_on:
       - transmission
@@ -65,14 +68,19 @@ services:
     networks:
       - traefik
     labels:
-      <<: *traefik-auth-labels
-      traefik.backend: sonarr
-      traefik.frontend.rule: "Host:sonarr.${SERVER_DOMAIN}"
-      traefik.port: 8989
-
+      traefik.enable: true
+      traefik.http.middlewares.sonarr-auth.basicauth.usersfile: /etc/traefik/.htpasswd.priv
+      traefik.http.routers.sonarr-secure.entrypoints: https
+      traefik.http.routers.sonarr-secure.rule: Host(`sonarr.${SERVER_DOMAIN}`)
+      traefik.http.routers.sonarr-secure.middlewares: sonarr-auth
+      traefik.http.routers.sonarr-secure.tls: true
+      traefik.http.routers.sonarr-secure.service: sonarr
+      traefik.http.services.sonarr.loadbalancer.server.port: 8989
+      traefik.docker.network: traefik
+   
   radarr:
     container_name: radarr
-    image: linuxserver/radarr
+    image: linuxserver/radarr:preview
     restart: unless-stopped
     depends_on:
       - transmission
@@ -90,10 +98,15 @@ services:
     networks:
       - traefik
     labels:
-      <<: *traefik-auth-labels
-      traefik.backend: radarr
-      traefik.frontend.rule: "Host:radarr.${SERVER_DOMAIN}"
-      traefik.port: 7878
+      traefik.enable: true
+      traefik.http.middlewares.radarr-auth.basicauth.usersfile: /etc/traefik/.htpasswd.priv
+      traefik.http.routers.radarr-secure.entrypoints: https
+      traefik.http.routers.radarr-secure.rule: Host(`radarr.${SERVER_DOMAIN}`)
+      traefik.http.routers.radarr-secure.middlewares: radarr-auth
+      traefik.http.routers.radarr-secure.tls: true
+      traefik.http.routers.radarr-secure.service: radarr
+      traefik.http.services.radarr.loadbalancer.server.port: 7878
+      traefik.docker.network: traefik
 
   jackett:
     container_name: jackett
@@ -111,7 +124,35 @@ services:
     networks:
       - traefik
     labels:
-      <<: *traefik-auth-labels
-      traefik.backend: jackett
-      traefik.frontend.rule: "Host:jackett.${SERVER_DOMAIN}"
-      traefik.port: 9117
+      traefik.enable: true
+      traefik.http.routers.jackett-secure.entrypoints: https
+      traefik.http.routers.jackett-secure.rule: Host(`jackett.${SERVER_DOMAIN}`)
+      traefik.http.routers.jackett-secure.tls: true
+      traefik.http.routers.jackett-secure.service: jackett
+      traefik.http.services.jackett.loadbalancer.server.port: 9117
+      traefik.docker.network: traefik
+   
+  deezloaderrmx:
+    container_name: deezloaderrmx
+    image: bocki/deezloaderrmx    
+    restart: unless-stopped
+    ports:
+      - "1730:1730"
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${CONFIG_PATH}/deezloaderrmx:/config
+      - ${DOWNLOADS_PATH}/deezloaderrmx:/downloads
+    networks:
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.http.middlewares.deezloaderrmx-auth.basicauth.usersfile: /etc/traefik/.htpasswd.priv
+      traefik.http.routers.deezloaderrmx-secure.entrypoints: https
+      traefik.http.routers.deezloaderrmx-secure.rule: Host(`deezloaderrmx.${SERVER_DOMAIN}`)
+      traefik.http.routers.deezloaderrmx-secure.middlewares: deezloaderrmx-auth
+      traefik.http.routers.deezloaderrmx-secure.tls: true
+      traefik.http.routers.deezloaderrmx-secure.service: deezloaderrmx
+      traefik.http.services.deezloaderrmx.loadbalancer.server.port: 1730
+      traefik.docker.network: traefik
